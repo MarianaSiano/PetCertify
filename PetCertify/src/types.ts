@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 export type CertificateType = 'playful' | 'elegant' | 'adventurous' | 'academic';
 
 export interface PetCertificateData {
