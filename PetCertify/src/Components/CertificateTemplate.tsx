@@ -1,10 +1,9 @@
-import React, { useRef } from 'react';
-import { PetCertificateData } from '../types';
-import { Award, PawPrint, Star, Trophy, GraduationCap, Calendar, User, Dog, Download, Image as ImageIcon, CheckCircle2 } from 'lucide-react';
-import html2canvas from 'html2canvas';
+import React, { useRef, useState } from "react";
+import { PetCertificateData } from "../types";
+import { Award, PawPrint, Star, Trophy, GraduationCap, Calendar, User, Dog, Download, Image as ImageIcon, CheckCircle2, Loader2 } from "lucide-react";
+import html2canvas from "html2canvas";
 import { jsPDF } from 'jspdf';
-import { Button } from './ui/Button';
-import { html } from 'motion/react-client';
+import { Button } from "./ui/Button";
 
 interface CertificateTemplateProps {
     data: PetCertificateData;
@@ -13,40 +12,75 @@ interface CertificateTemplateProps {
 
 export const CertificateTemplate: React.FC<CertificateTemplateProps> = ({ data, onDownloadComplete }) => {
     const certificateRef = useRef<HTMLDivElement>(null);
+    const [isExporting, setIsExporting] = useState<'png' | 'pdf' | null>(null);
+
+    const captureCertificate = async () => {
+        if(!certificateRef.current) return null;
+
+        try {
+            // Ensure all fonts are loaded
+            await document.fonts.ready;
+            // Small additional delay to ensure everything is rendered
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            const canvas = await html2canvas(certificateRef.current, {
+                scale: 4, // Very high quality
+                useCORS: true,
+                backgroundColor: '#ffffff',
+                logging: false,
+                allowTaint: false, // Changed to false for better security and stability
+                onclone: (clonedDoc) => {
+                    const el = clonedDoc.querySelector('[data-certificate-root]');
+                    if(el instanceof HTMLElement) {
+                        el.style.transform = 'none';
+                    }
+                }
+            });
+            return canvas;
+        } catch (error) {
+            console.error('Error capturing certificate:', error);
+            return null;
+        }
+    };
 
     const downloadPNG = async () => {
-        if (!certificateRef.current)
-            return;
-        const canvas = await html2canvas(certificateRef.current, {
-            scale: 3, //Higher scaler for better quality
-            useCORS: true,
-            backgroundColor: null,
-        });
-        const link = document.createElement('a');
-        link.download = `certificado-${data.petName.toLowerCase()}-${data.id}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        onDownloadComplete?.();
+        setIsExporting('png');
+        const canvas = await captureCertificate();
+
+        if(canvas) {
+            const link = document.createElement('a');
+            link.download = `certificado-${data.petName.toLowerCase().replace(/\s+/g, '-')}.png`;
+            link.href = canvas.toDataURL('image/png', 1.0);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            onDownloadComplete?.();
+        }
+        setIsExporting(null);
     };
 
     const downloadPDF = async () => {
-        if (!certificateRef.current)
-            return;
-        const canvas = await html2canvas(certificateRef.current, {
-            scale: 3,
-            useCORS: true,
-        });
-        const imgData = canvas.toDataURL('image/png')
-        // A4 landscape dimensions in px at 96 DPI are approx 1123 x 794
-        // We use the canvas dimensions to maintain aspect ratio exactly
-        const pdf = new jsPDF({
-            orientation: 'landscape',
-            unit: 'px',
-            format: [canvas.width, canvas.height],
-        });
-        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-        pdf.save(`certificado-${data.petName.toLowerCase()}-${data.id}.pdf`);
-        onDownloadComplete?.();
+        setIsExporting('pdf');
+        const canvas = await captureCertificate();
+
+        if(canvas) {
+            const imgData = canvas.toDataURL('image/png', 1.0);
+
+            // Calculate A4 Landscape dimensions (297mm x 210mm)
+            const pdf = new jsPDF({
+                orientation: 'landscape',
+                unit: 'mm',
+                format: 'a4',
+            });
+
+            const pdfWidth = 297;
+            const pdfHeight = 210;
+
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            pdf.save(`certificado-${data.petName.toLowerCase().replace(/\s+/g, '-')}.pdf`);
+            onDownloadComplete?.();
+        }
+        setIsExporting(null);
     };
 
     const renderContent = () => {
@@ -261,10 +295,11 @@ export const CertificateTemplate: React.FC<CertificateTemplateProps> = ({ data, 
     return (
         <div className="flex flex-col items-center gap-10">
             {/* Hidden container for generation */}
-            <div className="fixed -left-[9999px] top-0 pointer-events-none overflow-hidden">
+            <div className="fixed -left-[9999px] top-0 pointer-events-none overflow-hidden opacity-0">
                 <div
                     ref={certificateRef}
-                    style={{ width: '1500px', height: '1061px' }} // Higher res for export
+                    data-certificate-root
+                    style={{ width: '1123px', height: '794px', position: 'relative' }} // Fixed A4 landscape size for capture
                     className="bg-white"
                 >
                     {renderContent()}
@@ -282,16 +317,20 @@ export const CertificateTemplate: React.FC<CertificateTemplateProps> = ({ data, 
                     onClick={downloadPNG}
                     variant="secondary"
                     className="px-10 gap-3"
+                    disabled={isExporting !== null}
                 >
-                    <ImageIcon size={18} /> Salvar Imagem
+                    {isExporting === 'png' ? <Loader2 className="animate-spin" size={18} /> : <ImageIcon size={18} />}
+                    {isExporting === 'png' ? 'Gerando...' : 'Salvar Imagem'}
                 </Button>
                 <Button
                     onClick={downloadPDF}
                     className="px-10 gap-3"
+                    disabled={isExporting !== null}
                 >
-                    <Download size={18} /> Exportar PDF
+                    {isExporting === 'pdf' ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
+                    {isExporting === 'pdf' ? 'Gerando...' : 'Exportar PDF'}
                 </Button>
             </div>
         </div>
     );
-}
+};
