@@ -8,3 +8,11 @@ import { Card, CardContent } from './ui/Card';
 interface CSVUploadProps {
     onDataParsed: (data: PetCertificateData[]) => void;
 }
+
+export const CSVUpload: React.FC<CSVUploadProps> = ({ onDataParsed }) => {
+    const onDrop = useCallback((acceptedFiles: File[]) => {
+        acceptedFiles.forEach((file) => {
+            
+        })
+    })
+}
