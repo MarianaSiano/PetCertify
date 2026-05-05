@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { CertificateForm } from './Components/CertificateForm';
 import { CSVUpload } from './Components/CSVUpload';
-import { CertificateTemplate } from './Components/CertficateTemplate';
+import { CertificateTemplate } from './Components/CertificateTemplate';
+import { Footer } from './Components/Footer';
 import { useCertificates } from './hooks/useCertificates';
 import {
     PawPrint,
@@ -26,7 +27,7 @@ export default function App() {
         addCertificate,
         addBulkCertificates,
         deleteCertificate,
-        clearAllCertificates
+        clearAllCertificates,
     } = useCertificates();
 
     const [activeTab, setActiveTab] = useState<'create' | 'list'>('create');
@@ -289,16 +290,7 @@ export default function App() {
             </main>
 
             {/* Footer */}
-            <footer className="border-t border-slate-100 py-12 px-6 bg-white/50">
-                <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 opacity-50">
-                    <div className="flex items-center gap-3">
-                        <PawPrint size={16} className="text-primary" />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">PetCertify Document System</span>
-                    </div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">© 2026 Crafted with Excellence</p>
-                </div>
-            </footer>
-            <div className="h-1 bg-gradient-to-r from-primary-light via-primary to-primary-dark"></div>
+            <Footer />
         </div>
     );
 }
