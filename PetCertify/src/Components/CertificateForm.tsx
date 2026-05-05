@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { PetCertificateData, CertificateType } from '../types';
-import { PlusCircle, User, Dog, BookOpen, Star, Award, Trophy, Calendar } from 'lucide-react';
+import { PlusCircle, User, Dog, BookOpen, Star, Award, Trophy, Calendar, Sparkles } from 'lucide-react';
+import { Button } from './ui/Button';
+import { Input } from './ui/Input';
+import { Card, CardContent } from './ui/Card';
 
 interface CertificateFormProps {
     onSubmit: (data: PetCertificateData) => void;
@@ -37,138 +40,106 @@ export const CertificateForm: React.FC<CertificateFormProps> = ({ onSubmit }) =>
     };
 
     return (
-        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-3xl shadow-xl border-4 border-indigo-100 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-                <label className="block">
-                    <span className="text-indigo-900 font-bold flex items-center gap-2 mb-2">
-                        <Dog size={18} /> Nome do Pet
-                    </span>
-                    <input
-                        type="text"
-                        required
-                        value={formData.petName}
-                        onChange={(e) => setFormData({ ...formData, petName: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border-2 border-indigo-50 focus:border-indigo-500 focus:ring-0 transition-all outline-none"
-                        placeholder="Ex: Rex"
-                    />
-                </label>
+        <Card>
+            <CardContent>
+                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-6">
+                        <Input
+                            label="Nome do Pet"
+                            icon={<Dog size={16} />}
+                            required
+                            value={formData.petName}
+                            onChange={(e) => setFormData({ ...formData, petName: e.target.value })}
+                            placeholder="Ex: Rex"
+                        />
 
-                <label className="block">
-                    <span className="text-indigo-900 font-bold flex items-center gap-2 mb-2">
-                        <User size={18} /> Nome do Tutor
-                    </span>
-                    <input
-                        type="text"
-                        required
-                        value={formData.ownerName}
-                        onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border-2 border-indigo-50 focus:border-indigo-500 focus:ring-0 transition-all outline-none"
-                        placeholder="Ex: Maria Silva"
-                    />
-                </label>
+                        <Input
+                            label="Nome do Tutor"
+                            icon={<User size={16} />}
+                            required
+                            value={formData.ownerName}
+                            onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
+                            placeholder="Ex: Maria Silva"
+                        />
 
-                <label className="block">
-                    <span className="text-indigo-900 font-bold flex items-center gap-2 mb-2">
-                        <BookOpen size={18} /> Nome do Curso
-                    </span>
-                    <input
-                        type="text"
-                        required
-                        value={formData.courseName}
-                        onChange={(e) => setFormData({ ...formData, courseName: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border-2 border-indigo-50 focus:border-indigo-500 focus:ring-0 transition-all outline-none"
-                        placeholder="Ex: Adestramento Básico"
-                    />
-                </label>
-            </div>
-
-            <div className="space-y-4">
-                <label className="block">
-                    <span className="text-indigo-900 font-bold flex items-center gap-2 mb-2">
-                        <Star size={18} /> Méritos
-                    </span>
-                    <input
-                        type="text"
-                        required
-                        value={formData.merits}
-                        onChange={(e) => setFormData({ ...formData, merits: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border-2 border-indigo-50 focus:border-indigo-500 focus:ring-0 transition-all outline-none"
-                        placeholder="Ex: Comportamento Exemplar"
-                    />
-                </label>
-
-                <label className="block">
-                    <span className="text-indigo-900 font-bold flex items-center gap-2 mb-2">
-                        <Award size={18} /> Habilidades
-                    </span>
-                    <input
-                        type="text"
-                        required
-                        value={formData.skills}
-                        onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border-2 border-indigo-50 focus:border-indigo-500 focus:ring-0 transition-all outline-none"
-                        placeholder="Ex: Sentar, Deitar, Rolar"
-                    />
-                </label>
-
-                <label className="block">
-                    <span className="text-indigo-900 font-bold flex items-center gap-2 mb-2">
-                        <Trophy size={18} /> Conquista
-                    </span>
-                    <input
-                        type="text"
-                        required
-                        value={formData.achievements}
-                        onChange={(e) => setFormData({ ...formData, achievements: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border-2 border-indigo-50 focus:border-indigo-500 focus:ring-0 transition-all outline-none"
-                        placeholder="Ex: Melhor da Turma"
-                    />
-                </label>
-            </div>
-
-            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
-                <label className="block">
-                    <span className="text-indigo-900 font-bold flex items-center gap-2 mb-2">
-                        <Calendar size={18} /> Data
-                    </span>
-                    <input
-                        type="text"
-                        required
-                        value={formData.date}
-                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border-2 border-indigo-50 focus:border-indigo-500 focus:ring-0 transition-all outline-none"
-                    />
-                </label>
-
-                <div className="space-y-2">
-                    <span className="text-indigo-900 font-bold block mb-2">Estilo do Certificado</span>
-                    <div className="grid grid-cols-4 gap-2">
-                        {(['playful', 'elegant', 'adventurous', 'academic'] as CertificateType[]).map((type) => (
-                            <button
-                                key={type}
-                                type="button"
-                                onClick={() => setFormData({ ...formData, type })}
-                                className={`py-2 rounded-lg text-xs font-bold uppercase transition-all border-2 ${formData.type === type
-                                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-md'
-                                        : 'bg-white text-indigo-400 border-indigo-50 hover:border-indigo-200'
-                                    }`}
-                            >
-                                {type === 'playful' && 'Divertido'}
-                                {type === 'elegant' && 'Elegante'}
-                                {type === 'adventurous' && 'Aventura'}
-                                {type === 'academic' && 'Acadêmico'}
-                            </button>
-                        ))}
+                        <Input
+                            label="Nome do Curso"
+                            icon={<BookOpen size={16} />}
+                            required
+                            value={formData.courseName}
+                            onChange={(e) => setFormData({ ...formData, courseName: e.target.value })}
+                            placeholder="Ex: Adestramento Básico"
+                        />
                     </div>
-                </div>
-            </div>
 
-            <button
-                type="submit"
-                className="md:col-span-2 mt-4 bg-indigo-600 text-white py-4 rounded-2xl font-black text-lg uppercase tracking-widest hover:bg-indigo-700 transition-all flex items-center justify-center gap-3 shadow-xl hover:shadow-indigo-200"
-            >
-                <PlusCircle size={24} /> Gerar Certificado
-            </button>
-        </form>
+                    <div className="space-y-6">
+                        <Input
+                            label="Méritos"
+                            icon={<Star size={16} />}
+                            required
+                            value={formData.merits}
+                            onChange={(e) => setFormData({ ...formData, merits: e.target.value })}
+                            placeholder="Ex: Comportamento Exemplar"
+                        />
+
+                        <Input
+                            label="Habilidades"
+                            icon={<Award size={16} />}
+                            required
+                            value={formData.skills}
+                            onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
+                            placeholder="Ex: Sentar, Deitar, Rolar"
+                        />
+
+                        <Input
+                            label="Conquista"
+                            icon={<Trophy size={16} />}
+                            required
+                            value={formData.achievements}
+                            onChange={(e) => setFormData({ ...formData, achievements: e.target.value })}
+                            placeholder="Ex: Melhor da Turma"
+                        />
+                    </div>
+
+                    <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8 items-end pt-4 border-t border-slate-50">
+                        <Input
+                            label="Data de Conclusão"
+                            icon={<Calendar size={16} />}
+                            required
+                            value={formData.date}
+                            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                        />
+
+                        <div className="space-y-3">
+                            <span className="text-sm font-bold text-slate-700 flex items-center gap-2 px-1">
+                                <Sparkles size={16} className="text-primary" /> Estilo do Certificado
+                            </span>
+                            <div className="grid grid-cols-4 gap-2">
+                                {(['playful', 'elegant', 'adventurous', 'academic'] as CertificateType[]).map((type) => (
+                                    <button
+                                        key={type}
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, type })}
+                                        className={`py-2.5 rounded-xl text-[10px] font-black uppercase transition-all border-2 ${formData.type === type
+                                                ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20'
+                                                : 'bg-white text-slate-400 border-slate-100 hover:border-primary-light hover:text-primary'
+                                            }`}
+                                    >
+                                        {type === 'playful' && 'Divertido'}
+                                        {type === 'elegant' && 'Elegante'}
+                                        {type === 'adventurous' && 'Aventura'}
+                                        {type === 'academic' && 'Acadêmico'}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    <Button type="submit" className="md:col-span-2 mt-4 uppercase tracking-[0.1em] py-5">
+                        <PlusCircle size={20} className="mr-2" /> Gerar Certificado Personalizado
+                    </Button>
+                </form>
+            </CardContent>
+        </Card>
     );
 };
