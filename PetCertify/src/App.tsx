@@ -1,93 +1,71 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { CertificateForm } from './Components/CertificateForm';
 import { CSVUpload } from './Components/CSVUpload';
 import { CertificateTemplate } from './Components/CertficateTemplate';
-import { PetCertificateData } from './types';
-import { PawPrint, Plus, List, Trash2, Download, CheckCircle2, LayoutDashboard, Sparkles, User, Calendar } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { useCertificates } from './hooks/useCertificates';
+import {
+    PawPrint,
+    Plus,
+    List,
+    Trash2,
+    CheckCircle2,
+    LayoutDashboard,
+    Sparkles,
+    ChevronRight,
+    Info
+} from 'lucide-react';
+import { Button } from './Components/ui/Button';
+import { Card, CardContent } from './Components/ui/Card';
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function App() {
-    const [certificates, setCertificates] = useState<PetCertificateData[]>([]);
+    const {
+        certificates,
+        selectedCertificate,
+        setSelectedCertificate,
+        addCertificate,
+        addBulkCertificates,
+        deleteCertificate,
+        clearAllCertificates
+    } = useCertificates();
+
     const [activeTab, setActiveTab] = useState<'create' | 'list'>('create');
-    const [selectedCertificate, setSelectedCertificate] = useState<PetCertificateData | null>(null);
-    const [isBulkProcessing, setIsBulkProcessing] = useState(false);
-
-    // Load from local storage
-    useEffect(() => {
-        const saved = localStorage.getItem('pet-certificates');
-        if (saved) {
-            setCertificates(JSON.parse(saved));
-        }
-    }, []);
-
-    // Save to local storage
-    useEffect(() => {
-        localStorage.setItem('pet-certificates', JSON.stringify(certificates));
-    }, [certificates]);
-
-    const handleAddCertificate = (data: PetCertificateData) => {
-        setCertificates((prev) => [data, ...prev]);
-        setSelectedCertificate(data);
-        confetti({
-            particleCount: 150,
-            spread: 70,
-            origin: { y: 0.6 },
-            colors: ['#4F46E5', '#10B981', '#F59E0B', '#EF4444']
-        });
-    };
-
-    const handleBulkData = (data: PetCertificateData[]) => {
-        setCertificates((prev) => [...data, ...prev]);
-        setActiveTab('list');
-        confetti({
-            particleCount: 200,
-            spread: 100,
-            origin: { y: 0.6 },
-            colors: ['#4F46E5', '#10B981', '#F59E0B', '#EF4444']
-        });
-    };
-
-    const handleDelete = (id: string) => {
-        setCertificates((prev) => prev.filter((c) => c.id !== id));
-        if (selectedCertificate?.id === id) setSelectedCertificate(null);
-    };
 
     return (
-        <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-20">
+        <div className="min-h-screen flex flex-col">
             {/* Header */}
-            <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="bg-indigo-600 p-2 rounded-xl text-white shadow-lg shadow-indigo-200">
-                            <PawPrint size={28} />
+            <header className="glass sticky top-0 z-50 border-b border-primary/10">
+                <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className="bg-primary p-2.5 rounded-2xl text-white shadow-xl shadow-primary/30">
+                            <PawPrint size={24} />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-black text-indigo-900 tracking-tight leading-none">PetCertify</h1>
-                            <p className="text-xs text-indigo-400 font-bold uppercase tracking-widest mt-1">Certificados para Pets</p>
+                            <h1 className="text-xl font-black text-primary-dark tracking-tight leading-none uppercase">PetCertify</h1>
+                            <p className="text-[10px] text-primary font-bold uppercase tracking-[0.2em] mt-1 opacity-70">Professional Pet Rewards</p>
                         </div>
                     </div>
 
-                    <nav className="flex bg-slate-100 p-1 rounded-2xl">
+                    <nav className="flex bg-slate-100/50 p-1.5 rounded-2xl backdrop-blur-sm border border-slate-200/50">
                         <button
                             onClick={() => setActiveTab('create')}
-                            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-black transition-all ${activeTab === 'create'
-                                    ? 'bg-white text-indigo-600 shadow-sm'
-                                    : 'text-slate-500 hover:text-indigo-400'
+                            className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-black transition-all ${activeTab === 'create'
+                                    ? 'bg-white text-primary shadow-lg shadow-primary/5'
+                                    : 'text-slate-400 hover:text-primary/70'
                                 }`}
                         >
-                            <Plus size={18} /> CRIAR
+                            <Plus size={16} /> NOVO
                         </button>
                         <button
                             onClick={() => setActiveTab('list')}
-                            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-black transition-all ${activeTab === 'list'
-                                    ? 'bg-white text-indigo-600 shadow-sm'
-                                    : 'text-slate-500 hover:text-indigo-400'
+                            className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-black transition-all ${activeTab === 'list'
+                                    ? 'bg-white text-primary shadow-lg shadow-primary/5'
+                                    : 'text-slate-400 hover:text-primary/70'
                                 }`}
                         >
-                            <List size={18} /> LISTA
+                            <List size={16} /> GESTÃO
                             {certificates.length > 0 && (
-                                <span className="bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full text-[10px]">
+                                <span className="bg-primary/10 text-primary px-1.5 py-0.5 rounded-md text-[9px]">
                                     {certificates.length}
                                 </span>
                             )}
@@ -96,67 +74,98 @@ export default function App() {
                 </div>
             </header>
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
+            <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-12">
                 <AnimatePresence mode="wait">
                     {activeTab === 'create' ? (
                         <motion.div
                             key="create"
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
+                            exit={{ opacity: 0, y: -10 }}
                             className="grid grid-cols-1 lg:grid-cols-12 gap-12"
                         >
+                            <div className="lg:col-span-12 flex flex-col gap-2 mb-4">
+                                <h2 className="text-4xl font-black text-slate-800 tracking-tight flex items-center gap-3">
+                                    <Sparkles className="text-primary" size={32} />
+                                    Área de Criação
+                                </h2>
+                                <p className="text-slate-400 font-medium">Personalize certificados únicos para cada conquista pet.</p>
+                            </div>
+
                             <div className="lg:col-span-7 space-y-12">
                                 <section>
-                                    <div className="flex items-center gap-3 mb-6">
-                                        <Sparkles className="text-indigo-600" />
-                                        <h2 className="text-3xl font-black text-indigo-900">Novo Certificado</h2>
+                                    <div className="flex items-center justify-between mb-6">
+                                        <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                                            <ChevronRight size={14} className="text-primary" /> Cadastro Individual
+                                        </h3>
                                     </div>
-                                    <CertificateForm onSubmit={handleAddCertificate} />
+                                    <CertificateForm onSubmit={addCertificate} />
                                 </section>
 
                                 <section>
-                                    <div className="flex items-center gap-3 mb-6">
-                                        <LayoutDashboard className="text-indigo-600" />
-                                        <h2 className="text-3xl font-black text-indigo-900">Cadastro em Massa</h2>
+                                    <div className="flex items-center justify-between mb-6">
+                                        <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                                            <ChevronRight size={14} className="text-primary" /> Processamento em Lote
+                                        </h3>
+                                        <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
+                                            <Info size={12} /> FORMATO CSV
+                                        </div>
                                     </div>
-                                    <CSVUpload onDataParsed={handleBulkData} />
+                                    <CSVUpload onDataParsed={addBulkCertificates} />
                                 </section>
                             </div>
 
                             <div className="lg:col-span-5">
-                                <div className="sticky top-32">
-                                    <div className="flex items-center gap-3 mb-6">
-                                        <CheckCircle2 className="text-indigo-600" />
-                                        <h2 className="text-3xl font-black text-indigo-900">Visualização</h2>
+                                <div className="sticky top-32 space-y-8">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                                            <CheckCircle2 size={14} className="text-primary" /> Prévia do Documento
+                                        </h3>
                                     </div>
+
                                     {selectedCertificate ? (
-                                        <div className="space-y-6">
-                                            <div className="transform scale-75 origin-top">
-                                                <CertificateTemplate
-                                                    data={selectedCertificate}
-                                                    onDownloadComplete={() => { }}
-                                                />
-                                            </div>
-                                            <div className="bg-white p-6 rounded-3xl shadow-xl border-2 border-indigo-50 flex items-center justify-between">
-                                                <div>
-                                                    <p className="text-xs text-indigo-400 font-bold uppercase mb-1">Certificado Gerado</p>
-                                                    <p className="text-xl font-black text-indigo-900">{selectedCertificate.petName}</p>
+                                        <motion.div
+                                            layoutId={selectedCertificate.id}
+                                            className="space-y-6"
+                                        >
+                                            <div className="shadow-2xl shadow-primary/20 rounded-3xl overflow-hidden active:scale-95 transition-transform duration-500">
+                                                <div className="transform scale-[0.55] md:scale-[0.8] origin-top">
+                                                    <CertificateTemplate
+                                                        data={selectedCertificate}
+                                                    />
                                                 </div>
-                                                <button
-                                                    onClick={() => setSelectedCertificate(null)}
-                                                    className="text-slate-400 hover:text-red-500 transition-colors"
-                                                >
-                                                    <Trash2 size={24} />
-                                                </button>
                                             </div>
-                                        </div>
+
+                                            <Card glass className="border-primary/20">
+                                                <CardContent className="flex items-center justify-between py-6">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="bg-primary/10 p-3 rounded-2xl text-primary">
+                                                            <PawPrint size={20} />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[10px] text-primary font-black uppercase tracking-widest">Documento Ativo</p>
+                                                            <p className="text-xl font-black text-slate-800">{selectedCertificate.petName}</p>
+                                                        </div>
+                                                    </div>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => setSelectedCertificate(null)}
+                                                        className="text-slate-300 hover:text-red-500"
+                                                    >
+                                                        <Trash2 size={20} />
+                                                    </Button>
+                                                </CardContent>
+                                            </Card>
+                                        </motion.div>
                                     ) : (
-                                        <div className="bg-white border-4 border-dashed border-slate-200 rounded-3xl p-12 flex flex-col items-center justify-center text-center opacity-50">
-                                            <div className="bg-slate-100 p-6 rounded-full mb-4">
-                                                <PawPrint size={48} className="text-slate-300" />
+                                        <div className="bg-slate-100/50 border-4 border-dashed border-slate-200/50 rounded-[2.5rem] p-20 flex flex-col items-center justify-center text-center group transition-all hover:bg-white hover:border-primary-light/50">
+                                            <div className="bg-white p-6 rounded-full mb-6 shadow-xl shadow-slate-200/50 group-hover:scale-110 transition-transform">
+                                                <PawPrint size={48} className="text-slate-200 group-hover:text-primary-light" />
                                             </div>
-                                            <p className="text-slate-400 font-bold">Preencha o formulário para ver a prévia do certificado aqui!</p>
+                                            <p className="text-slate-400 font-bold max-w-[200px] leading-relaxed">
+                                                Selecione ou crie um certificado para visualizar aqui.
+                                            </p>
                                         </div>
                                     )}
                                 </div>
@@ -165,109 +174,111 @@ export default function App() {
                     ) : (
                         <motion.div
                             key="list"
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            className="space-y-8"
+                            exit={{ opacity: 0, y: -10 }}
+                            className="space-y-12"
                         >
-                            <div className="flex items-center justify-between mb-8">
-                                <div className="flex items-center gap-3">
-                                    <List className="text-indigo-600" size={32} />
-                                    <h2 className="text-4xl font-black text-indigo-900">Certificados Gerados</h2>
+                            <div className="flex items-end justify-between border-b pb-8 border-slate-100">
+                                <div className="flex flex-col gap-2">
+                                    <h2 className="text-4xl font-black text-slate-800 tracking-tight flex items-center gap-3">
+                                        <LayoutDashboard className="text-primary" size={32} />
+                                        Painel de Gestão
+                                    </h2>
+                                    <p className="text-slate-400 font-medium">Controle e exportação de certificados emitidos.</p>
                                 </div>
+
                                 {certificates.length > 0 && (
-                                    <button
-                                        onClick={() => {
-                                            if (confirm('Tem certeza que deseja limpar todos os certificados?')) {
-                                                setCertificates([]);
-                                                setSelectedCertificate(null);
-                                            }
-                                        }}
-                                        className="flex items-center gap-2 text-red-500 font-bold hover:bg-red-50 px-4 py-2 rounded-xl transition-all"
+                                    <Button
+                                        variant="danger"
+                                        size="sm"
+                                        onClick={clearAllCertificates}
+                                        className="gap-2"
                                     >
-                                        <Trash2 size={18} /> Limpar Tudo
-                                    </button>
+                                        <Trash2 size={16} /> APAGAR TUDO
+                                    </Button>
                                 )}
                             </div>
 
                             {certificates.length === 0 ? (
-                                <div className="bg-white rounded-3xl p-20 text-center shadow-xl border-2 border-indigo-50">
-                                    <div className="bg-indigo-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
-                                        <PawPrint size={48} className="text-indigo-200" />
+                                <div className="bg-white rounded-[3rem] p-32 text-center shadow-2xl border-2 border-slate-50 flex flex-col items-center max-w-4xl mx-auto">
+                                    <div className="bg-primary/5 w-32 h-32 rounded-full flex items-center justify-center mb-8">
+                                        <PawPrint size={64} className="text-primary-light" />
                                     </div>
-                                    <h3 className="text-2xl font-black text-indigo-900 mb-2">Nenhum certificado ainda</h3>
-                                    <p className="text-slate-400 max-w-md mx-auto mb-8">
-                                        Comece criando um certificado individual ou fazendo upload de um arquivo CSV.
+                                    <h3 className="text-3xl font-black text-slate-800 mb-4">Base de Dados Vazia</h3>
+                                    <p className="text-slate-400 max-w-sm mb-12 font-medium">
+                                        Ainda não existem registros em sua conta. Comece pelo painel de criação.
                                     </p>
-                                    <button
+                                    <Button
+                                        size="lg"
                                         onClick={() => setActiveTab('create')}
-                                        className="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black shadow-lg hover:bg-indigo-700 transition-all"
+                                        className="px-12"
                                     >
-                                        CRIAR MEU PRIMEIRO CERTIFICADO
-                                    </button>
+                                        INICIAR EMISSÃO
+                                    </Button>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                     {certificates.map((cert) => (
                                         <motion.div
                                             layout
                                             key={cert.id}
-                                            className="bg-white rounded-3xl p-6 shadow-xl border-2 border-indigo-50 hover:border-indigo-200 transition-all group"
+                                            initial={{ opacity: 0, scale: 0.95 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            className="group"
                                         >
-                                            <div className="flex justify-between items-start mb-4">
-                                                <div className={`p-3 rounded-2xl ${cert.type === 'playful' ? 'bg-yellow-100 text-yellow-600' :
-                                                        cert.type === 'elegant' ? 'bg-indigo-100 text-indigo-600' :
-                                                            cert.type === 'adventurous' ? 'bg-emerald-100 text-emerald-600' :
-                                                                'bg-blue-100 text-blue-600'
-                                                    }`}>
-                                                    <PawPrint size={24} />
-                                                </div>
-                                                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Card className="hover:border-primary/30 transition-all p-8 flex flex-col h-full bg-slate-50/30">
+                                                <div className="flex justify-between items-start mb-8">
+                                                    <div className={`p-4 rounded-2xl shadow-lg ${cert.type === 'playful' ? 'bg-amber-100 text-amber-600 shadow-amber-200/50' :
+                                                            cert.type === 'elegant' ? 'bg-primary-dark text-white shadow-primary-dark/30' :
+                                                                cert.type === 'adventurous' ? 'bg-emerald-100 text-emerald-600 shadow-emerald-200/50' :
+                                                                    'bg-blue-600 text-white shadow-blue-200/50'
+                                                        }`}>
+                                                        <PawPrint size={24} />
+                                                    </div>
                                                     <button
-                                                        onClick={() => handleDelete(cert.id)}
-                                                        className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                                                        onClick={() => deleteCertificate(cert.id)}
+                                                        className="opacity-0 group-hover:opacity-100 p-2 text-slate-300 hover:text-red-500 transition-all transform hover:rotate-12"
                                                     >
                                                         <Trash2 size={20} />
                                                     </button>
                                                 </div>
-                                            </div>
 
-                                            <h3 className="text-2xl font-black text-indigo-900 mb-1">{cert.petName}</h3>
-                                            <p className="text-sm text-indigo-400 font-bold uppercase tracking-widest mb-4">{cert.courseName}</p>
+                                                <div className="flex-1">
+                                                    <h3 className="text-2xl font-black text-slate-800 mb-2 truncate group-hover:text-primary transition-colors">{cert.petName}</h3>
+                                                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] mb-6">{cert.courseName}</p>
 
-                                            <div className="space-y-2 mb-6">
-                                                <div className="flex items-center gap-2 text-xs text-slate-500">
-                                                    <User size={14} /> <span className="font-bold">{cert.ownerName}</span>
+                                                    <div className="flex items-center gap-6 text-[11px] font-bold text-slate-500 opacity-60">
+                                                        <span className="flex items-center gap-1.5"><ChevronRight size={10} className="text-primary" /> {cert.ownerName}</span>
+                                                        <span className="flex items-center gap-1.5"><ChevronRight size={10} className="text-primary" /> {cert.date}</span>
+                                                    </div>
                                                 </div>
-                                                <div className="flex items-center gap-2 text-xs text-slate-500">
-                                                    <Calendar size={14} /> <span>{cert.date}</span>
-                                                </div>
-                                            </div>
 
-                                            <div className="flex gap-3">
-                                                <button
-                                                    onClick={() => {
-                                                        setSelectedCertificate(cert);
-                                                        setActiveTab('create');
-                                                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                                                    }}
-                                                    className="flex-1 bg-slate-100 text-slate-600 py-3 rounded-xl font-bold text-sm hover:bg-indigo-50 hover:text-indigo-600 transition-all flex items-center justify-center gap-2"
-                                                >
-                                                    <LayoutDashboard size={16} /> VER
-                                                </button>
-                                                <button
-                                                    onClick={() => {
-                                                        setSelectedCertificate(cert);
-                                                        // We trigger the download by setting it as selected and then using the template buttons
-                                                        // But for better UX, we can just jump to the preview
-                                                        setActiveTab('create');
-                                                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                                                    }}
-                                                    className="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 shadow-md"
-                                                >
-                                                    <Download size={16} /> BAIXAR
-                                                </button>
-                                            </div>
+                                                <div className="grid grid-cols-2 gap-3 mt-10">
+                                                    <Button
+                                                        variant="secondary"
+                                                        size="sm"
+                                                        onClick={() => {
+                                                            setSelectedCertificate(cert);
+                                                            setActiveTab('create');
+                                                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                                                        }}
+                                                        className="bg-white border border-slate-200 text-slate-600 hover:text-primary hover:border-primary-light"
+                                                    >
+                                                        VISUALIZAR
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        onClick={() => {
+                                                            setSelectedCertificate(cert);
+                                                            setActiveTab('create');
+                                                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                                                        }}
+                                                    >
+                                                        EXPORTAR
+                                                    </Button>
+                                                </div>
+                                            </Card>
                                         </motion.div>
                                     ))}
                                 </div>
@@ -277,8 +288,17 @@ export default function App() {
                 </AnimatePresence>
             </main>
 
-            {/* Footer Decoration */}
-            <div className="fixed bottom-0 left-0 w-full h-2 bg-gradient-to-r from-yellow-400 via-indigo-600 to-emerald-500 z-50"></div>
+            {/* Footer */}
+            <footer className="border-t border-slate-100 py-12 px-6 bg-white/50">
+                <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 opacity-50">
+                    <div className="flex items-center gap-3">
+                        <PawPrint size={16} className="text-primary" />
+                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">PetCertify Document System</span>
+                    </div>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">© 2026 Crafted with Excellence</p>
+                </div>
+            </footer>
+            <div className="h-1 bg-gradient-to-r from-primary-light via-primary to-primary-dark"></div>
         </div>
     );
 }
